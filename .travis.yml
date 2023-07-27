@@ -1,0 +1,29 @@
+language: go
+go:
+ - "1.13"
+ - "1.14"
+ - "tip"
+
+addons:
+  postgresql: "9.6"
+
+services:
+  - postgresql
+
+install:
+  - go install
+  - npm install less sass -g
+
+before_script:
+  - erp generate -t ./src/tests/testmodule
+  - psql -c 'create database erp_test_models;' -U postgres
+  - psql -c 'create database erp_test_tests;' -U postgres
+
+script:
+  - ./run_tests.sh
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+
+env:
+  - erp_DB_DRIVER=postgres erp_DB_USER=postgres erp_DB_PASSWORD= erp_DB_PREFIX=erp_test GO111MODULE=on
